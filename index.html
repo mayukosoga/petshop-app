@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="ペットショップ" />
+<meta name="theme-color" content="#bfe9ff" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="assets/icon-180.png" />
+<title>ペットショップ</title>
+<style>
+  :root{
+    --sky:#bfe9ff; --grass:#bfe9a8; --pink:#ff7eb3; --cream:#fff7ef;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; height:100%; overscroll-behavior:none; }
+  body{
+    font-family:"Hiragino Maru Gothic ProN","ヒラギノ丸ゴ ProN W4",sans-serif;
+    color:#5a3d2b; user-select:none; -webkit-user-select:none;
+    background:var(--sky);
+  }
+  #app{ position:fixed; inset:0; overflow:hidden; }
+  .screen{
+    position:absolute; inset:0; display:none;
+    flex-direction:column; align-items:center; justify-content:center;
+    padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+  }
+  .screen.active{ display:flex; animation:fadein .35s ease; }
+  @keyframes fadein{ from{opacity:0} to{opacity:1} }
+
+  /* ---------- Opening ---------- */
+  #opening{ background:linear-gradient(#cdecff,#eaf7ff); }
+  .shop{ position:relative; width:min(92vw,440px); }
+  .shop img{ width:100%; height:auto; display:block; filter:drop-shadow(0 10px 18px rgba(90,120,160,.25)); }
+  /* カウンター（店員さんの下）に置く肉球ボタン */
+  .paw-btn{
+    position:absolute; top:72%; left:50%; transform:translate(-50%,-50%);
+    width:104px; height:104px; border:none; border-radius:50%; cursor:pointer;
+    background:radial-gradient(circle at 38% 32%, #ffd0e6 0%, #ff7eb8 48%, #ff4f9e 100%);
+    border:6px solid #fff; box-shadow:0 8px 0 #e23e86, 0 12px 22px rgba(226,62,134,.45);
+    display:flex; align-items:center; justify-content:center;
+    animation:pawpulse 1.2s ease-in-out infinite;
+  }
+  .paw-btn .paw{ font-size:54px; line-height:1; }
+  .paw-btn:active{ transform:translate(-50%,-50%) scale(.9); box-shadow:0 3px 0 #e23e86; }
+  @keyframes pawpulse{ 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.08)} }
+  .paw-label{
+    position:absolute; top:calc(72% + 70px); left:50%; transform:translateX(-50%);
+    font-size:17px; font-weight:bold; color:#e0568a; white-space:nowrap;
+    text-shadow:0 1px 0 #fff,0 0 6px #fff;
+  }
+
+  /* ---------- Choose ---------- */
+  #choose{ background:linear-gradient(#d8f3ff,#eafff1); justify-content:flex-start; padding-top:max(24px,env(safe-area-inset-top)); }
+  .title{ font-size:26px; font-weight:bold; color:#4a7bd0; margin:8px 0 6px; }
+  .subtitle{ font-size:16px; color:#7a8aa0; margin-bottom:14px; }
+  .pets{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
+    width:100%; max-width:440px;
+  }
+  .pet-card{
+    position:relative;
+    background:#fff; border-radius:24px; padding:10px 6px 8px;
+    box-shadow:0 6px 0 rgba(120,140,170,.18); border:3px solid #fff;
+    display:flex; flex-direction:column; align-items:center;
+    transition:transform .12s ease; cursor:pointer;
+  }
+  .pet-card:active{ transform:scale(.94); }
+  .pet-card img{ width:100%; height:104px; object-fit:contain; }
+  .pet-card .name{ font-size:18px; font-weight:bold; margin-top:2px; }
+  .pet-card.locked{ opacity:.82; }
+  .pet-card.locked img{ filter:grayscale(.25); }
+  .pet-card.locked .name{ color:#9aa7b8; }
+  .pet-card.wide{ grid-column:1 / -1; }
+  .badge{
+    position:absolute; top:-8px; right:-6px; z-index:2;
+    background:#ffce3a; color:#7a5500; font-size:13px; font-weight:bold;
+    padding:4px 11px; border-radius:999px; transform:rotate(6deg);
+    box-shadow:0 3px 0 #e0a800; border:2px solid #fff;
+  }
+
+  /* ---------- Care ---------- */
+  #care{
+    background:
+      radial-gradient(120% 60% at 50% 116%, #aee59a 0 40%, transparent 41%),
+      linear-gradient(#cdeeff 0 58%, #d8f6c9 58% 100%);
+    justify-content:flex-end;
+  }
+  .meter-wrap{
+    position:absolute; top:max(18px,env(safe-area-inset-top)); left:0; right:0;
+    display:flex; flex-direction:column; align-items:center; gap:6px; pointer-events:none;
+  }
+  .meter-label{ font-size:17px; font-weight:bold; color:#e0568a; }
+  .hearts{ display:flex; gap:6px; }
+  .hearts .h{ font-size:33px; line-height:1; transition:opacity .2s ease, transform .2s ease; }
+  .hearts .h.justfilled{ animation:heartpop .4s ease; }
+  @keyframes heartpop{ 0%{transform:scale(1)} 40%{transform:scale(1.45)} 100%{transform:scale(1)} }
+  .pet-stage{ position:relative; width:100%; max-width:480px; flex:1; display:flex; align-items:center; justify-content:center; }
+  #petImg{
+    width:min(82vw,360px); height:auto; cursor:pointer;
+    animation:breathe 2.6s ease-in-out infinite;
+    filter:drop-shadow(0 12px 10px rgba(90,80,60,.18));
+  }
+  @keyframes breathe{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.035)} }
+  #petImg.wiggle{ animation:wiggle .5s ease; }
+  @keyframes wiggle{
+    0%{transform:scale(1) rotate(0)} 20%{transform:scale(1.08) rotate(-5deg)}
+    40%{transform:scale(1.06) rotate(5deg)} 60%{transform:scale(1.07) rotate(-3deg)}
+    80%{transform:scale(1.05) rotate(2deg)} 100%{transform:scale(1) rotate(0)}
+  }
+  .talk{
+    position:absolute; top:18%; left:50%; transform:translateX(-50%) scale(0);
+    background:#fff; color:#e0568a; font-weight:bold; font-size:20px;
+    padding:8px 18px; border-radius:999px; box-shadow:0 4px 0 #ffd5e6;
+    white-space:nowrap; pointer-events:none;
+  }
+  .talk.show{ animation:pop .9s ease; }
+  @keyframes pop{ 0%{transform:translateX(-50%) scale(0)} 25%{transform:translateX(-50%) scale(1.1)} 70%{transform:translateX(-50%) scale(1)} 100%{transform:translateX(-50%) scale(0)} }
+  .hint{ position:absolute; bottom:26px; left:0; right:0; text-align:center; color:#6b8f57; font-size:17px; font-weight:bold; }
+
+  .float-heart{ position:absolute; width:52px; height:auto; pointer-events:none; will-change:transform,opacity; animation:rise 1s ease-out forwards; z-index:5; }
+  @keyframes rise{ 0%{transform:translate(-50%,-50%) scale(.4); opacity:0} 15%{opacity:1} 100%{transform:translate(-50%,-180%) scale(1.2); opacity:0} }
+
+  .back{
+    position:absolute; top:max(14px,env(safe-area-inset-top)); left:14px;
+    width:48px; height:48px; border-radius:50%; border:none; background:#ffffffcc;
+    font-size:24px; box-shadow:0 4px 0 rgba(120,140,170,.25); cursor:pointer; z-index:8;
+  }
+  .back:active{ transform:scale(.92); }
+
+  /* ---------- iPad など大きい画面 ---------- */
+  @media (min-width:700px){
+    .shop{ width:min(74vw,560px); }
+    .paw-btn{ width:128px; height:128px; }
+    .paw-btn .paw{ font-size:66px; }
+    .title{ font-size:34px; }
+    .subtitle{ font-size:20px; margin-bottom:20px; }
+    .pets{ max-width:640px; gap:20px; }
+    .pet-card img{ height:150px; }
+    .pet-card .name{ font-size:22px; }
+    .badge{ font-size:16px; padding:5px 14px; top:-10px; }
+    .meter-label{ font-size:22px; }
+    .hearts .h{ font-size:42px; }
+    .hearts{ gap:10px; }
+    #petImg{ width:min(70vw,460px); }
+    .hint{ font-size:22px; bottom:40px; }
+    .talk{ font-size:26px; }
+    .float-heart{ width:64px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 1. オープニング -->
+  <section id="opening" class="screen active">
+    <div class="shop">
+      <img src="assets/petshop.png" alt="ペットショップ" />
+      <button class="paw-btn" id="startBtn" aria-label="はじめる"><span class="paw">🐾</span></button>
+      <div class="paw-label">タップしてはじめる</div>
+    </div>
+  </section>
+
+  <!-- 2. ペットをえらぶ -->
+  <section id="choose" class="screen">
+    <div class="title">どの子とあそぶ？</div>
+    <div class="subtitle">すきなペットをえらんでね</div>
+    <div class="pets">
+      <div class="pet-card" data-pet="dog"><img src="assets/dog.png" alt="いぬ"><div class="name">いぬ</div></div>
+      <div class="pet-card locked" data-pet="cat"><span class="badge">もうすぐ</span><img src="assets/cat.png" alt="ねこ"><div class="name">ねこ</div></div>
+      <div class="pet-card locked" data-pet="rabbit"><span class="badge">もうすぐ</span><img src="assets/rabbit.png" alt="うさぎ"><div class="name">うさぎ</div></div>
+      <div class="pet-card locked" data-pet="hamster"><span class="badge">もうすぐ</span><img src="assets/hamster.png" alt="ハムスター"><div class="name">ハムスター</div></div>
+      <div class="pet-card locked wide" data-pet="pig"><span class="badge">もうすぐ</span><img src="assets/pig.png" alt="ぶた" style="height:84px"><div class="name">ぶた</div></div>
+    </div>
+  </section>
+
+  <!-- 3. なでる -->
+  <section id="care" class="screen">
+    <button class="back" id="backBtn" aria-label="もどる">‹</button>
+    <div class="meter-wrap">
+      <div class="meter-label">なつきど</div>
+      <div class="hearts" id="hearts">
+        <span class="h">🖤</span><span class="h">🖤</span><span class="h">🖤</span><span class="h">🖤</span><span class="h">🖤</span>
+      </div>
+    </div>
+    <div class="pet-stage" id="stage">
+      <div class="talk" id="talk">だいすき！</div>
+      <img id="petImg" src="assets/dog.png" alt="ペット" />
+    </div>
+    <div class="hint">なでてみてね 🐾</div>
+  </section>
+
+</div>
+
+<script>
+  const KEY_AFF = "petApp.affection.v2";
+  const KEY_PET = "petApp.pet";
+
+  const screens = {
+    opening: document.getElementById("opening"),
+    choose:  document.getElementById("choose"),
+    care:    document.getElementById("care"),
+  };
+  function show(name){
+    Object.values(screens).forEach(s => s.classList.remove("active"));
+    screens[name].classList.add("active");
+  }
+
+  // ---- なつき度 ----
+  let affection = parseInt(localStorage.getItem(KEY_AFF) || "0", 10);
+  if (isNaN(affection)) affection = 0;
+  const heartEls = [...document.querySelectorAll("#hearts .h")];
+  const PER = 100 / heartEls.length;   // ハート1個ぶんの割合（20）
+  let prevFull = -1;                   // 直前まで満タンだったハート数
+  function renderMeter(animate){
+    let nowFull = 0;
+    heartEls.forEach((el,i) => {
+      let f = (affection - i*PER) / PER;        // このハートの満ち具合 0〜1
+      f = Math.max(0, Math.min(1, f));
+      if (f <= 0){                               // まだ → 黒
+        el.textContent = "🖤";
+        el.style.opacity = 1;
+        el.style.transform = "scale(1)";
+      } else {                                   // 染まり中〜満タン → 赤（だんだん濃く・大きく）
+        el.textContent = "❤️";
+        el.style.opacity = (0.35 + 0.65*f).toFixed(2);
+        el.style.transform = "scale(" + (0.8 + 0.2*f).toFixed(2) + ")";
+        if (f >= 1) nowFull++;
+      }
+    });
+    // 新しく満タンになったハートをポンッと跳ねさせる
+    if (animate && nowFull > prevFull && nowFull > 0){
+      const el = heartEls[nowFull-1];
+      el.classList.remove("justfilled"); void el.offsetWidth; el.classList.add("justfilled");
+    }
+    prevFull = nowFull;
+  }
+  function save(){ localStorage.setItem(KEY_AFF, String(affection)); }
+
+  // ---- 画面遷移 ----
+  document.getElementById("startBtn").addEventListener("click", () => show("choose"));
+
+  document.querySelectorAll(".pet-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const pet = card.dataset.pet;
+      if (card.classList.contains("locked")) { wobble(card); return; }
+      localStorage.setItem(KEY_PET, pet);
+      renderMeter();
+      show("care");
+    });
+  });
+  document.getElementById("backBtn").addEventListener("click", () => show("choose"));
+
+  function wobble(el){
+    el.animate(
+      [{transform:"rotate(0)"},{transform:"rotate(-4deg)"},{transform:"rotate(4deg)"},{transform:"rotate(0)"}],
+      {duration:300, easing:"ease"}
+    );
+  }
+
+  // ---- なでる ----
+  const petImg = document.getElementById("petImg");
+  const stage  = document.getElementById("stage");
+  const talk   = document.getElementById("talk");
+  const messages = ["だいすき！","うれしい！","もっと！","クゥ～ン♪","えへへ"];
+
+  function spawnHearts(clientX, clientY){
+    const rect = stage.getBoundingClientRect();
+    const x = clientX - rect.left, y = clientY - rect.top;
+    const n = 3 + Math.floor(Math.random()*2); // 3〜4個
+    for (let i=0;i<n;i++){
+      const el = document.createElement("img");
+      el.src = "assets/heart.png"; el.alt = "";
+      el.className = "float-heart";
+      const size = 40 + Math.random()*28;        // 40〜68px とサイズもバラつかせる
+      el.style.width = size + "px";
+      el.style.left = (x + (Math.random()*70-35)) + "px";
+      el.style.top  = (y + (Math.random()*30-15)) + "px";
+      el.style.animationDuration = (0.8 + Math.random()*0.5) + "s";
+      stage.appendChild(el);
+      el.addEventListener("animationend", () => el.remove());
+    }
+  }
+
+  let talkTimer = null;
+  function pet(clientX, clientY){
+    spawnHearts(clientX, clientY);
+    petImg.classList.remove("wiggle");
+    void petImg.offsetWidth;        // reflow → アニメ再生
+    petImg.classList.add("wiggle");
+    if (navigator.vibrate) navigator.vibrate(15);
+
+    affection = Math.min(100, affection + 8);
+    save(); renderMeter(true);
+
+    // ときどきセリフ
+    if (Math.random() < 0.45 || affection >= 100){
+      talk.textContent = affection >= 100 ? "だいすき！💖" : messages[Math.floor(Math.random()*messages.length)];
+      talk.classList.remove("show"); void talk.offsetWidth; talk.classList.add("show");
+      clearTimeout(talkTimer);
+      talkTimer = setTimeout(()=>talk.classList.remove("show"), 900);
+    }
+  }
+
+  // タップ／ドラッグ両対応（ドラッグ中は少し間引く）
+  let lastPet = 0;
+  function onMove(e){
+    const now = Date.now();
+    if (now - lastPet < 220) return;
+    lastPet = now;
+    const p = e.touches ? e.touches[0] : e;
+    pet(p.clientX, p.clientY);
+  }
+  petImg.addEventListener("pointerdown", e => { e.preventDefault(); pet(e.clientX, e.clientY); lastPet = Date.now(); });
+  petImg.addEventListener("pointermove", e => { if (e.pressure > 0 || e.buttons) onMove(e); });
+  petImg.addEventListener("dragstart", e => e.preventDefault());
+
+  renderMeter();
+</script>
+</body>
+</html>

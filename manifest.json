@@ -1,0 +1,13 @@
+{
+  "name": "ペットショップ",
+  "short_name": "ペットショップ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#bfe9ff",
+  "theme_color": "#bfe9ff",
+  "icons": [
+    { "src": "assets/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
