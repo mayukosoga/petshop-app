@@ -76,6 +76,7 @@
   }
   .pet-card:active{ transform:scale(.94); }
   .pet-card img{ width:100%; height:150px; object-fit:contain; }
+  .pet-card[data-pet="hamster"] img{ transform:scale(.72); }
   .pet-card .name{ font-size:22px; font-weight:bold; margin-top:2px; }
   .pet-card.locked{ opacity:.82; }
   .pet-card.locked img{ filter:grayscale(.25); }
@@ -111,6 +112,7 @@
     filter:drop-shadow(0 12px 10px rgba(90,80,60,.18));
   }
   @keyframes breathe{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.035)} }
+  #petImg[data-pet="hamster"]{ width:min(46vw,260px); height:min(33vh,260px); }
   #petImg.wiggle{ animation:wiggle .5s ease; }
   @keyframes wiggle{
     0%{transform:scale(1) rotate(0)} 20%{transform:scale(1.08) rotate(-5deg)}
@@ -579,6 +581,7 @@
       currentPet = pet;
       localStorage.setItem(KEY_PET, pet);
       petImg.src = "assets/" + pet + ".png";
+      petImg.dataset.pet = pet;
       affection = loadAff(pet);          // この子のなつきどを読み込む
       prevFull = -1;
       renderMeter();
