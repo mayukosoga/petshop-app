@@ -125,7 +125,6 @@
   }
   .talk.show{ animation:pop .9s ease; }
   @keyframes pop{ 0%{transform:translateX(-50%) scale(0)} 25%{transform:translateX(-50%) scale(1.1)} 70%{transform:translateX(-50%) scale(1)} 100%{transform:translateX(-50%) scale(0)} }
-  .hint{ position:absolute; bottom:40px; left:0; right:0; text-align:center; color:#6b8f57; font-size:22px; font-weight:bold; }
 
   .float-heart{ position:absolute; width:64px; height:auto; pointer-events:none; will-change:transform,opacity; animation:rise 1s ease-out forwards; z-index:5; }
   @keyframes rise{ 0%{transform:translate(-50%,-50%) scale(.4); opacity:0} 15%{opacity:1} 100%{transform:translate(-50%,-180%) scale(1.2); opacity:0} }
@@ -179,6 +178,73 @@
   .reward-text{ font-size:27px; font-weight:bold; color:#e0a000; margin-top:6px; line-height:1.2; }
   .coin-burst{ position:absolute; pointer-events:none; z-index:21; }
 
+  /* ---------- カートボタン（おみせへ） ---------- */
+  .cart-btn{
+    position:absolute; top:max(14px,env(safe-area-inset-top)); right:14px; z-index:9;
+    width:54px; height:54px; border-radius:50%; border:none; cursor:pointer;
+    background:radial-gradient(circle at 38% 30%, #fff0b8 0%, #ffce5a 55%, #f5a623 100%);
+    border:3px solid #fff; box-shadow:0 5px 0 #d98e00, 0 8px 14px rgba(217,142,0,.4);
+    display:flex; align-items:center; justify-content:center; font-size:26px; line-height:1;
+  }
+  .cart-btn:active{ transform:scale(.9); box-shadow:0 2px 0 #d98e00; }
+  /* care画面では右上にコインがあるので、その左隣に置く */
+  #care .cart-btn{ right:auto; left:14px; top:max(72px,calc(env(safe-area-inset-top) + 58px)); }
+
+  /* ---------- おみせ（ショップ） ---------- */
+  #shop{
+    background:linear-gradient(#fff2cf,#fff8ea); justify-content:flex-start;
+    padding-top:max(24px,env(safe-area-inset-top));
+    padding-bottom:calc(env(safe-area-inset-bottom) + 40px);
+    overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  }
+  #shop .title{ color:#e09600; }
+  .shop-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; width:100%; max-width:640px; margin-top:6px; }
+  .food-card{
+    position:relative; background:#fff; border-radius:22px; padding:10px 6px 10px;
+    box-shadow:0 6px 0 rgba(200,160,40,.22); border:3px solid #fff;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .food-card img{ width:100%; height:96px; object-fit:contain; pointer-events:none; }
+  .food-card .fname{ font-size:18px; font-weight:bold; margin-top:4px; }
+  .food-card .have{
+    position:absolute; top:-8px; left:-6px; z-index:2;
+    background:#7ec8ff; color:#fff; font-size:15px; font-weight:bold;
+    min-width:26px; padding:3px 8px; border-radius:999px; text-align:center;
+    box-shadow:0 3px 0 #3f9ee0; border:2px solid #fff;
+  }
+  .buy-btn{
+    margin-top:8px; border:none; cursor:pointer; font-weight:bold; color:#fff;
+    font-size:17px; padding:9px 14px; border-radius:999px;
+    display:flex; align-items:center; gap:5px; line-height:1;
+    background:linear-gradient(#ffb43e,#ff9500); box-shadow:0 4px 0 #d97a00;
+  }
+  .buy-btn .coin{ font-size:18px; }
+  .buy-btn:active{ transform:scale(.93); box-shadow:0 1px 0 #d97a00; }
+  .buy-btn.shake{ animation:shake .4s; }
+  @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} }
+  .shop-note{ font-size:16px; color:#b08a3a; margin-top:18px; text-align:center; }
+  .fly-food{ position:fixed; width:70px; height:auto; pointer-events:none; z-index:30; will-change:transform,opacity; }
+
+  /* ---------- ごはんバー（care画面の下） ---------- */
+  .food-bar{
+    position:absolute; bottom:max(18px,calc(env(safe-area-inset-bottom) + 12px)); left:0; right:0;
+    display:flex; gap:14px; align-items:flex-end; justify-content:center; z-index:8;
+  }
+  .food-slot{
+    position:relative; width:74px; height:74px; border-radius:18px; cursor:pointer;
+    background:#ffffffcc; border:3px solid #fff; box-shadow:0 4px 0 rgba(120,140,170,.22);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .food-slot img{ width:74%; height:74%; object-fit:contain; pointer-events:none; }
+  .food-slot.empty{ opacity:.45; filter:grayscale(.5); }
+  .food-slot:active{ transform:scale(.9); }
+  .food-slot .cnt{
+    position:absolute; top:-8px; right:-8px; min-width:24px;
+    background:#ff7eb3; color:#fff; font-size:14px; font-weight:bold;
+    padding:2px 7px; border-radius:999px; text-align:center; border:2px solid #fff;
+    box-shadow:0 2px 0 #e0568a;
+  }
+
   /* ---------- iPadを基準（default）に。以下はスマホ等の小さい画面向けに縮小 ---------- */
   @media (max-width:699px){
     .shop{ width:min(92vw,440px); }
@@ -194,11 +260,17 @@
     .hearts .h{ font-size:33px; }
     .hearts{ gap:6px; }
     #petImg{ width:min(82vw,360px); }
-    .hint{ font-size:17px; bottom:26px; }
     .talk{ font-size:20px; }
     .float-heart{ width:52px; }
     .coin-badge{ font-size:18px; }
     .coin-badge .coin{ font-size:20px; }
+    .cart-btn{ width:46px; height:46px; font-size:22px; }
+    .shop-grid{ gap:10px; }
+    .food-card img{ height:74px; }
+    .food-card .fname{ font-size:15px; }
+    .buy-btn{ font-size:15px; padding:8px 12px; }
+    .food-slot{ width:60px; height:60px; }
+    .food-bar{ gap:10px; }
   }
 </style>
 </head>
@@ -212,10 +284,13 @@
       <button class="paw-btn" id="startBtn" aria-label="はじめる"><span class="paw">🐾</span></button>
       <div class="paw-label">タップしてはじめる</div>
     </div>
+    <button class="cart-btn" data-shop aria-label="おみせ">🛒</button>
   </section>
 
   <!-- 2. ペットをえらぶ -->
   <section id="choose" class="screen">
+    <div class="coin-badge" id="coinBadge2"><span class="coin"></span><span class="coinNum">0</span></div>
+    <button class="cart-btn" data-shop aria-label="おみせ" style="top:max(70px,calc(env(safe-area-inset-top) + 56px))">🛒</button>
     <div class="title">どの子とあそぶ？</div>
     <div class="subtitle">すきなペットをえらんでね</div>
     <div class="pets">
@@ -230,7 +305,8 @@
   <!-- 3. なでる -->
   <section id="care" class="screen">
     <button class="back" id="backBtn" aria-label="もどる">‹</button>
-    <div class="coin-badge" id="coinBadge"><span class="coin"></span><span id="coinCount">0</span></div>
+    <button class="cart-btn" data-shop aria-label="おみせ">🛒</button>
+    <div class="coin-badge" id="coinBadge"><span class="coin"></span><span id="coinCount" class="coinNum">0</span></div>
     <div class="reward" id="reward">
       <div class="reward-card">
         <div class="reward-emoji"><span class="coin"></span></div>
@@ -247,7 +323,17 @@
       <div class="talk" id="talk">だいすき！</div>
       <img id="petImg" src="assets/dog.png" alt="ペット" />
     </div>
-    <div class="hint">なでてみてね 🐾</div>
+    <div class="food-bar" id="foodBar"></div>
+  </section>
+
+  <!-- 4. おみせ -->
+  <section id="shop" class="screen">
+    <button class="back" id="shopBack" aria-label="もどる">‹</button>
+    <div class="coin-badge"><span class="coin"></span><span class="coinNum">0</span></div>
+    <div class="title">おみせ</div>
+    <div class="subtitle">コインでごはんをかおう</div>
+    <div class="shop-grid" id="shopGrid"></div>
+    <div class="shop-note">ごはんをあげると<br>ペットがよろこぶよ 🍴</div>
   </section>
 
 </div>
@@ -260,10 +346,16 @@
     opening: document.getElementById("opening"),
     choose:  document.getElementById("choose"),
     care:    document.getElementById("care"),
+    shop:    document.getElementById("shop"),
   };
+  let prevScreen = "opening";
   function show(name){
+    const cur = Object.keys(screens).find(k => screens[k].classList.contains("active"));
+    if (cur && cur !== "shop") prevScreen = cur;
     Object.values(screens).forEach(s => s.classList.remove("active"));
     screens[name].classList.add("active");
+    if (name === "shop") renderShop();
+    if (name === "care")  renderFoodBar();
   }
 
   // ---- なつき度 ----
@@ -301,14 +393,94 @@
   const KEY_COIN = "petApp.coins";
   let coins = parseInt(localStorage.getItem(KEY_COIN) || "0", 10);
   if (isNaN(coins)) coins = 0;
-  const coinCountEl = document.getElementById("coinCount");
   const coinBadge   = document.getElementById("coinBadge");
   const rewardEl    = document.getElementById("reward");
+  const coinNumEls  = [...document.querySelectorAll(".coinNum")];
   function renderCoins(bump){
-    coinCountEl.textContent = coins;
-    if (bump){ coinBadge.classList.remove("bump"); void coinBadge.offsetWidth; coinBadge.classList.add("bump"); }
+    coinNumEls.forEach(el => el.textContent = coins);
+    if (bump){
+      document.querySelectorAll(".coin-badge").forEach(b => {
+        b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+      });
+    }
   }
   function saveCoins(){ localStorage.setItem(KEY_COIN, String(coins)); }
+
+  // ---- 餌（ごはん）＆ おみせ ----
+  const FOODS = [
+    { id:"meat",   name:"ぶたにく", img:"assets/meat.png"   },
+    { id:"fish",   name:"サケ",     img:"assets/fish.png"   },
+    { id:"carrot", name:"にんじん", img:"assets/carrot.png" },
+    { id:"tane",   name:"たね",     img:"assets/tane.png"   },
+    { id:"bone",   name:"ほね",     img:"assets/bone.png"   },
+  ];
+  const PRICE = 10;
+  const KEY_INV = "petApp.inventory";
+  let inventory = {};
+  try { inventory = JSON.parse(localStorage.getItem(KEY_INV) || "{}") || {}; } catch(e){ inventory = {}; }
+  FOODS.forEach(f => { if (typeof inventory[f.id] !== "number") inventory[f.id] = 0; });
+  function saveInv(){ localStorage.setItem(KEY_INV, JSON.stringify(inventory)); }
+
+  const shopGrid = document.getElementById("shopGrid");
+  function renderShop(){
+    shopGrid.innerHTML = "";
+    FOODS.forEach(f => {
+      const card = document.createElement("div");
+      card.className = "food-card";
+      card.innerHTML =
+        (inventory[f.id] > 0 ? '<span class="have">×'+inventory[f.id]+'</span>' : '') +
+        '<img src="'+f.img+'" alt="'+f.name+'">' +
+        '<div class="fname">'+f.name+'</div>' +
+        '<button class="buy-btn"><span class="coin"></span>'+PRICE+'</button>';
+      card.querySelector(".buy-btn").addEventListener("click", () => buy(f, card));
+      shopGrid.appendChild(card);
+    });
+    renderCoins();
+  }
+  function buy(f, card){
+    const btn = card.querySelector(".buy-btn");
+    if (coins < PRICE){
+      btn.classList.remove("shake"); void btn.offsetWidth; btn.classList.add("shake");
+      if (navigator.vibrate) navigator.vibrate([30,30,30]);
+      return;
+    }
+    coins -= PRICE; saveCoins();
+    inventory[f.id] += 1; saveInv();
+    if (navigator.vibrate) navigator.vibrate(20);
+    flyFood(f.img, card.querySelector("img"));
+    renderShop();
+  }
+  // 買った餌がコインのほうへ飛ぶ演出
+  function flyFood(src, fromImg){
+    const r = fromImg.getBoundingClientRect();
+    const badge = document.querySelector("#shop .coin-badge");
+    const t = badge.getBoundingClientRect();
+    const el = document.createElement("img");
+    el.src = src; el.className = "fly-food";
+    el.style.left = (r.left + r.width/2 - 35) + "px";
+    el.style.top  = (r.top + r.height/2 - 35) + "px";
+    document.body.appendChild(el);
+    el.animate([
+      { transform:"translate(0,0) scale(1)", opacity:1 },
+      { transform:`translate(${t.left + t.width/2 - r.left - r.width/2}px,${t.top + t.height/2 - r.top - r.height/2}px) scale(.3)`, opacity:0 }
+    ], { duration:600, easing:"cubic-bezier(.5,0,.6,1)" });
+    setTimeout(() => el.remove(), 650);
+  }
+
+  // ---- ごはんバー（care画面） ----
+  const foodBar = document.getElementById("foodBar");
+  function renderFoodBar(){
+    foodBar.innerHTML = "";
+    FOODS.forEach(f => {
+      const has = inventory[f.id] > 0;
+      const slot = document.createElement("div");
+      slot.className = "food-slot" + (has ? "" : " empty");
+      slot.innerHTML = '<img src="'+f.img+'" alt="'+f.name+'">' +
+        (has ? '<span class="cnt">×'+inventory[f.id]+'</span>' : '');
+      slot.addEventListener("click", () => feed(f, slot));
+      foodBar.appendChild(slot);
+    });
+  }
 
   let rewarding = false;
   function giveReward(){
@@ -345,8 +517,53 @@
     }
   }
 
+  // ペットにごはんをあげる
+  function feed(f, slot){
+    if (inventory[f.id] <= 0){
+      slot.animate(
+        [{transform:"translateY(0)"},{transform:"translateY(-8px)"},{transform:"translateY(0)"}],
+        {duration:300, easing:"ease"}
+      );
+      return;
+    }
+    if (rewarding) return;
+    inventory[f.id] -= 1; saveInv();
+    renderFoodBar();
+
+    // 餌がペットの口元へ飛んでいく
+    const sr = slot.getBoundingClientRect();
+    const pr = petImg.getBoundingClientRect();
+    const fly = document.createElement("img");
+    fly.src = f.img; fly.className = "fly-food";
+    fly.style.left = (sr.left + sr.width/2 - 35) + "px";
+    fly.style.top  = (sr.top + sr.height/2 - 35) + "px";
+    document.body.appendChild(fly);
+    fly.animate([
+      { transform:"translate(0,0) scale(1)", opacity:1 },
+      { transform:`translate(${pr.left + pr.width/2 - sr.left - sr.width/2}px,${pr.top + pr.height*0.55 - sr.top - sr.height/2}px) scale(1.1)`, opacity:1, offset:.7 },
+      { transform:`translate(${pr.left + pr.width/2 - sr.left - sr.width/2}px,${pr.top + pr.height*0.55 - sr.top - sr.height/2}px) scale(.2)`, opacity:0 }
+    ], { duration:650, easing:"cubic-bezier(.4,0,.5,1)" });
+    setTimeout(() => fly.remove(), 700);
+
+    // もぐもぐ → よろこぶ
+    setTimeout(() => {
+      petImg.classList.remove("wiggle"); void petImg.offsetWidth; petImg.classList.add("wiggle");
+      if (navigator.vibrate) navigator.vibrate([15,30,15]);
+      talk.textContent = "もぐもぐ♪";
+      talk.classList.remove("show"); void talk.offsetWidth; talk.classList.add("show");
+      clearTimeout(talkTimer);
+      talkTimer = setTimeout(()=>talk.classList.remove("show"), 1000);
+
+      affection = Math.min(100, affection + 20);   // ごはんはなつき度アップ大
+      save(); renderMeter(true);
+      if (affection >= 100 && !rewarding){ setTimeout(giveReward, 500); }
+    }, 560);
+  }
+
   // ---- 画面遷移 ----
   document.getElementById("startBtn").addEventListener("click", () => show("choose"));
+  document.querySelectorAll("[data-shop]").forEach(b => b.addEventListener("click", () => show("shop")));
+  document.getElementById("shopBack").addEventListener("click", () => show(prevScreen));
 
   document.querySelectorAll(".pet-card").forEach(card => {
     card.addEventListener("click", () => {
