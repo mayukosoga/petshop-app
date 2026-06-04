@@ -34,7 +34,7 @@
 
   /* ---------- Opening ---------- */
   #opening{ background:linear-gradient(#cdecff,#eaf7ff); }
-  .shop{ position:relative; width:min(74vw,560px); }
+  .shop{ position:relative; width:min(92vw,720px); }
   .shop img{ width:100%; height:auto; display:block; filter:drop-shadow(0 10px 18px rgba(90,120,160,.25)); }
   /* カウンター（店員さんの下）に置く肉球ボタン */
   .paw-btn{
@@ -106,7 +106,7 @@
   @keyframes heartpop{ 0%{transform:scale(1)} 40%{transform:scale(1.45)} 100%{transform:scale(1)} }
   .pet-stage{ position:relative; width:100%; max-width:480px; flex:1; display:flex; align-items:center; justify-content:center; }
   #petImg{
-    width:min(70vw,460px); height:auto; cursor:pointer;
+    width:min(64vw,360px); height:min(46vh,360px); object-fit:contain; cursor:pointer;
     animation:breathe 2.6s ease-in-out infinite;
     filter:drop-shadow(0 12px 10px rgba(90,80,60,.18));
   }
@@ -247,7 +247,7 @@
 
   /* ---------- iPadを基準（default）に。以下はスマホ等の小さい画面向けに縮小 ---------- */
   @media (max-width:699px){
-    .shop{ width:min(92vw,440px); }
+    .shop{ width:min(98vw,560px); }
     .paw-btn{ width:104px; height:104px; }
     .paw-btn .paw{ font-size:54px; }
     .title{ font-size:26px; }
@@ -259,7 +259,7 @@
     .meter-label{ font-size:17px; }
     .hearts .h{ font-size:33px; }
     .hearts{ gap:6px; }
-    #petImg{ width:min(82vw,360px); }
+    #petImg{ width:min(76vw,300px); height:42vh; }
     .talk{ font-size:20px; }
     .float-heart{ width:52px; }
     .coin-badge{ font-size:18px; }
@@ -295,10 +295,10 @@
     <div class="subtitle">すきなペットをえらんでね</div>
     <div class="pets">
       <div class="pet-card" data-pet="dog"><img src="assets/dog.png" alt="いぬ"><div class="name">いぬ</div></div>
-      <div class="pet-card locked" data-pet="cat"><span class="badge">もうすぐ</span><img src="assets/cat.png" alt="ねこ"><div class="name">ねこ</div></div>
-      <div class="pet-card locked" data-pet="rabbit"><span class="badge">もうすぐ</span><img src="assets/rabbit.png" alt="うさぎ"><div class="name">うさぎ</div></div>
-      <div class="pet-card locked" data-pet="hamster"><span class="badge">もうすぐ</span><img src="assets/hamster.png" alt="ハムスター"><div class="name">ハムスター</div></div>
-      <div class="pet-card locked wide" data-pet="pig"><span class="badge">もうすぐ</span><img src="assets/pig.png" alt="ぶた" style="height:84px"><div class="name">ぶた</div></div>
+      <div class="pet-card" data-pet="cat"><img src="assets/cat.png" alt="ねこ"><div class="name">ねこ</div></div>
+      <div class="pet-card" data-pet="rabbit"><img src="assets/rabbit.png" alt="うさぎ"><div class="name">うさぎ</div></div>
+      <div class="pet-card" data-pet="hamster"><img src="assets/hamster.png" alt="ハムスター"><div class="name">ハムスター</div></div>
+      <div class="pet-card wide" data-pet="pig"><img src="assets/pig.png" alt="ぶた" style="height:84px"><div class="name">ぶた</div></div>
     </div>
   </section>
 
@@ -358,9 +358,16 @@
     if (name === "care")  renderFoodBar();
   }
 
-  // ---- なつき度 ----
-  let affection = parseInt(localStorage.getItem(KEY_AFF) || "0", 10);
-  if (isNaN(affection)) affection = 0;
+  // ---- なつき度（動物ごとに個別管理） ----
+  let currentPet = localStorage.getItem(KEY_PET) || "dog";
+  function affKey(pet){ return "petApp.aff." + pet; }
+  function loadAff(pet){
+    let v = parseInt(localStorage.getItem(affKey(pet)), 10);
+    // 旧バージョン（いぬのみ共通キーだった）からの引き継ぎ
+    if (isNaN(v) && pet === "dog") v = parseInt(localStorage.getItem(KEY_AFF), 10);
+    return isNaN(v) ? 0 : v;
+  }
+  let affection = loadAff(currentPet);
   const heartEls = [...document.querySelectorAll("#hearts .h")];
   const PER = 100 / heartEls.length;   // ハート1個ぶんの割合（20）
   let prevFull = -1;                   // 直前まで満タンだったハート数
@@ -387,7 +394,7 @@
     }
     prevFull = nowFull;
   }
-  function save(){ localStorage.setItem(KEY_AFF, String(affection)); }
+  function save(){ localStorage.setItem(affKey(currentPet), String(affection)); }
 
   // ---- コイン ----
   const KEY_COIN = "petApp.coins";
@@ -569,7 +576,11 @@
     card.addEventListener("click", () => {
       const pet = card.dataset.pet;
       if (card.classList.contains("locked")) { wobble(card); return; }
+      currentPet = pet;
       localStorage.setItem(KEY_PET, pet);
+      petImg.src = "assets/" + pet + ".png";
+      affection = loadAff(pet);          // この子のなつきどを読み込む
+      prevFull = -1;
       renderMeter();
       show("care");
     });
